@@ -59,6 +59,98 @@
   }
   function isMobile() { return /iphone|ipad|ipod|android|mobile/i.test(navigator.userAgent); }
 
+  /* ---------------- 录音对比 ---------------- */
+  var recAudio = { mr: null, chunks: [], stream: null, url: null, t0: 0, tick: null, player: null };
+
+  function audioSupported() {
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+  }
+
+  function updateRecBtn(on) {
+    var b = $('btnRecAudio');
+    if (!b) return;
+    b.classList.toggle('rec-on', !!on);
+    b.innerHTML = on ? '<span class="recording-dot"></span>停止录音' : '🔴 录音对比';
+  }
+
+  function cleanupRecAudio() {
+    if (recAudio.stream) {
+      recAudio.stream.getTracks().forEach(function (t) { try { t.stop(); } catch (e) {} });
+      recAudio.stream = null;
+    }
+    recAudio.mr = null;
+  }
+
+  function startRecAudio() {
+    if (recAudio.mr) return;
+    if (synth) synth.cancel();
+    if (state.listening) stopUI();
+    $('playback').classList.add('hidden');
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      recAudio.stream = stream;
+      recAudio.chunks = [];
+      var mr;
+      try {
+        mr = new MediaRecorder(stream, MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/webm')
+          ? { mimeType: 'audio/webm' } : undefined);
+      } catch (e) {
+        try { mr = new MediaRecorder(stream); } catch (e2) { toast('这台设备不支持录音'); cleanupRecAudio(); return; }
+      }
+      recAudio.mr = mr;
+      mr.ondataavailable = function (e) { if (e.data && e.data.size) recAudio.chunks.push(e.data); };
+      mr.onstop = function () {
+        var blob = new Blob(recAudio.chunks, { type: mr.mimeType || 'audio/webm' });
+        if (recAudio.url) URL.revokeObjectURL(recAudio.url);
+        recAudio.url = URL.createObjectURL(blob);
+        cleanupRecAudio();
+        updateRecBtn(false);
+        $('playback').classList.remove('hidden');
+      };
+      try { mr.start(); } catch (e) { toast('录音启动失败'); cleanupRecAudio(); updateRecBtn(false); return; }
+      recAudio.t0 = Date.now();
+      updateRecBtn(true);
+      clearInterval(recAudio.tick);
+      recAudio.tick = setInterval(function () {
+        var s = Math.floor((Date.now() - recAudio.t0) / 1000);
+        var b = $('btnRecAudio');
+        if (b) b.innerHTML = '<span class="recording-dot"></span>停止录音 ' + s + 's';
+        if (s >= 15) stopRecAudio();
+      }, 250);
+    }).catch(function (err) {
+      updateRecBtn(false);
+      var name = err && err.name;
+      toast(name === 'NotAllowedError' ? '麦克风被拒绝，请在浏览器设置里允许' : '无法开始录音');
+    });
+  }
+
+  function stopRecAudio() {
+    clearInterval(recAudio.tick);
+    if (recAudio.mr && recAudio.mr.state !== 'inactive') {
+      try { recAudio.mr.stop(); } catch (e) {}
+    }
+  }
+
+  function playMine() {
+    if (!recAudio.url) { toast('还没有录音'); return; }
+    try {
+      if (!recAudio.player) recAudio.player = new Audio();
+      recAudio.player.src = recAudio.url;
+      recAudio.player.currentTime = 0;
+      recAudio.player.play().catch(function () { toast('播放失败，再点一次试试'); });
+    } catch (e) { toast('播放失败'); }
+  }
+
+  function resetAudioTools() {
+    clearInterval(recAudio.tick);
+    if (recAudio.mr && recAudio.mr.state !== 'inactive') {
+      try { recAudio.mr.onstop = null; recAudio.mr.stop(); } catch (e) {}
+    }
+    cleanupRecAudio();
+    if (recAudio.url) { URL.revokeObjectURL(recAudio.url); recAudio.url = null; }
+    updateRecBtn(false);
+    if ($('playback')) $('playback').classList.add('hidden');
+  }
+
   /* ---------------- 文本归一化 & 打分 ---------------- */
   var ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
     'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen',
@@ -264,6 +356,7 @@
     if (state.lock || state.listening) return;
     if (!SR) { openManual(); return; }
     if (synth) synth.cancel();
+    if (recAudio.mr) stopRecAudio();
 
     state.listening = true;
     state.finalText = '';
@@ -463,6 +556,7 @@
     $('manual').classList.add('hidden');
     $('liveBox').classList.add('hidden');
     $('diff').innerHTML = '';
+    resetAudioTools();
     $('scoreRing').style.background = 'conic-gradient(#eaf0fa 0deg,#eaf0fa 0deg)';
 
     var n = state.queue.length;
@@ -555,6 +649,12 @@
     $('btnPlay').addEventListener('click', function () { speak(state.current.en); });
     $('btnSlow').addEventListener('click', function () { speak(state.current.en, 0.6); });
     $('btnRecord').addEventListener('click', startRecord);
+    $('btnRecAudio').addEventListener('click', function () {
+      if (recAudio.mr) stopRecAudio(); else startRecAudio();
+    });
+    $('btnPlayMine').addEventListener('click', playMine);
+    $('btnPlayStd').addEventListener('click', function () { speak(state.current.en); });
+    $('btnReRec').addEventListener('click', function () { resetAudioTools(); startRecAudio(); });
     $('btnAgain').addEventListener('click', function () {
       $('result').classList.add('hidden');
       speak(state.current.en);
@@ -683,7 +783,7 @@
   // 调试/测试入口
   window.__kes = {
     scoreTexts: scoreTexts, tokenize: tokenize, state: state, store: store,
-    renderResult: renderResult, phrases: PHRASES
+    renderResult: renderResult, phrases: PHRASES, recAudio: recAudio
   };
 
   /* ---------------- 手机 / 微信 ---------------- */
@@ -741,6 +841,7 @@
       chosenVoice = pickVoice();
       synth.onvoiceschanged = function () { chosenVoice = pickVoice(); refreshVoiceList(); };
     }
+    if (audioSupported()) $('audioTools').classList.remove('hidden');
     initMobile();
     bind();
     renderHome();
