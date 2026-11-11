@@ -642,6 +642,61 @@
       })(u, from, to);
       grid.appendChild(btn);
     }
+
+    // 按场景分类
+    var catGrid = $('catGrid');
+    if (catGrid) {
+      var catMap = {}, catOrder = [];
+      PHRASES.forEach(function (p) {
+        if (!p.cat) return;
+        if (!catMap[p.cat]) { catMap[p.cat] = []; catOrder.push(p.cat); }
+        catMap[p.cat].push(p.id);
+      });
+      catGrid.innerHTML = '';
+      if (!catOrder.length) {
+        $('catHead').classList.add('hidden');
+        catGrid.classList.add('hidden');
+      } else {
+        catOrder.forEach(function (name) {
+          var list = catMap[name];
+          var done = list.filter(function (id) { return (scores[id] || 0) >= 80; }).length;
+          var b = document.createElement('button');
+          b.className = 'cat';
+          b.innerHTML =
+            '<span class="c-emoji">' + catEmoji(name) + '</span>' +
+            '<span class="c-body">' +
+            '<span class="c-name">' + name + '</span>' +
+            '<span class="c-cnt">' + list.length + ' 句 · 已练 ' + done + '</span>' +
+            '<span class="c-bar"><i style="width:' + Math.round(done / list.length * 100) + '%"></i></span>' +
+            '</span>';
+          b.addEventListener('click', function () { startCategory(list, name, scores); });
+          catGrid.appendChild(b);
+        });
+      }
+    }
+  }
+
+  function catEmoji(name) {
+    var map = [
+      [/职场|工作/, '💼'], [/会议/, '🗣️'], [/日常|社交/, '☕'], [/观点/, '💡'],
+      [/问题|突发/, '🛠️'], [/购物|餐厅|消费/, '🛒'], [/旅行|出行|住宿/, '✈️'],
+      [/家庭|健康/, '🏠'], [/学习|成长/, '📚'], [/电话|网络/, '📞']
+    ];
+    for (var i = 0; i < map.length; i++) if (map[i][0].test(name)) return map[i][1];
+    return '🎯';
+  }
+
+  // 从该场景里挑「还没练熟」的句子，凑一轮（默认 20 句），练完再点会接着往后
+  function startCategory(list, name, scores) {
+    var start = -1;
+    for (var i = 0; i < list.length; i++) {
+      if ((scores[list[i]] || 0) < 80) { start = i; break; }
+    }
+    if (start < 0) start = 0;                        // 全练熟了就从头发再复习一遍
+    var n = Math.min(store.settings.len || 20, list.length);
+    var slice = [];
+    for (var k = 0; k < n; k++) slice.push(list[(start + k) % list.length]);
+    startPractice(slice, name);
   }
 
   /* ---------------- 事件 ---------------- */
