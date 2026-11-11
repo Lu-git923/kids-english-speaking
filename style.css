@@ -161,6 +161,15 @@ body{
 
 .kb-tip{text-align:center;color:#a8b8cc;font-size:11px;margin-top:14px}
 
+/* 录音对比 */
+.audio-tools{margin-top:14px;text-align:center}
+.btn.small{font-size:14px;padding:10px 16px;border-radius:13px}
+.playback{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin-top:10px}
+.playback .link-btn{padding:6px 8px}
+.recording-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff4d4d;
+  margin-right:6px;animation:blink 1s infinite;vertical-align:1px}
+#btnRecAudio.rec-on{background:#ffecec;color:#d94a4a}
+
 /* 弹层 */
 .overlay{
   position:fixed;inset:0;background:rgba(23,38,60,.42);backdrop-filter:blur(3px);
