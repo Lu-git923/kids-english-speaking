@@ -80,6 +80,16 @@
         <span class="dot"></span><span id="liveText">我在听……</span>
       </div>
 
+      <!-- 录音对比（不依赖语音识别，安卓也能用） -->
+      <div id="audioTools" class="audio-tools hidden">
+        <button id="btnRecAudio" class="btn ghost small">🔴 录音对比</button>
+        <div id="playback" class="playback hidden">
+          <button id="btnPlayMine" class="btn small">▶️ 听我读的</button>
+          <button id="btnPlayStd" class="btn small">🔊 听标准音</button>
+          <button id="btnReRec" class="link-btn">🔁 重录</button>
+        </div>
+      </div>
+
       <div id="result" class="result hidden">
         <div class="score-row">
           <div class="score-ring" id="scoreRing"><span id="scoreNum">0</span><small>分</small></div>
