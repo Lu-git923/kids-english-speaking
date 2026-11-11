@@ -1,0 +1,16 @@
+{
+  "name": "英语口语小达人",
+  "short_name": "口语小达人",
+  "description": "听一听、跟着读、拿星星——小学英语口语跟读打分练习",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef8ff",
+  "theme_color": "#4f8cff",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png", "purpose": "apple touch icon" }
+  ]
+}
