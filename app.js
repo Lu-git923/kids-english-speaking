@@ -359,6 +359,8 @@
     if (recAudio.mr) stopRecAudio();
 
     state.listening = true;
+    state.userFinished = false;
+    state.interim = '';
     state.finalText = '';
     state.alts = [];
     $('result').classList.add('hidden');
@@ -366,7 +368,8 @@
     $('liveBox').classList.remove('hidden');
     $('liveText').textContent = '我在听……大声读出来吧';
     $('btnRecord').classList.add('listening');
-    $('btnRecord').textContent = '🎙️ 正在听……（读完自动停止）';
+    $('btnRecord').textContent = '🎙️ 正在听……';
+    $('btnDone').classList.remove('hidden');
 
     var rec;
     try { rec = new SR(); } catch (e) { stopUI(); toast('无法启动麦克风'); return; }
@@ -389,10 +392,16 @@
           interim += r[0].transcript;
         }
       }
+      state.interim = interim;
       var live = (state.finalText + ' ' + interim).trim();
       if (live) $('liveText').textContent = live;
     };
     rec.onerror = function (e) {
+      // 用户已经点了「读完了」：某些浏览器 stop() 会报 aborted，直接按现有内容评分
+      if (state.userFinished && (e.error === 'aborted' || e.error === 'no-speech')) {
+        forceFinish();
+        return;
+      }
       stopUI();
       var map = {
         'not-allowed': '麦克风被拒绝了，请点地址栏的🔒允许麦克风',
@@ -409,7 +418,14 @@
       got = false;
     };
     rec.onend = function () {
+      var finished = state.userFinished;
+      var spoken = (state.finalText + ' ' + (state.interim || '')).trim();
       stopUI();
+      if (finished) {
+        if (!spoken) { toast('没听清，再大声一点试试～'); return; }
+        evaluate();
+        return;
+      }
       if (!got || !state.finalText.trim()) {
         if (!state.manualOpen) toast('没听清，再大声一点试试～');
         return;
@@ -431,11 +447,36 @@
 
   function stopUI() {
     state.listening = false;
+    state.userFinished = false;
     clearTimeout(state.timer);
+    clearTimeout(state.endTimer);
     $('liveBox').classList.add('hidden');
     $('btnRecord').classList.remove('listening');
     $('btnRecord').textContent = '🎤 开始跟读';
+    $('btnDone').classList.add('hidden');
     if (state.rec) { try { state.rec.onend = null; state.rec.abort(); } catch (e) {} state.rec = null; }
+  }
+
+  /* 点「读完了」= 立刻停止识别并评分，不用等自动断句 */
+  function finishRecord() {
+    if (!state.listening || !state.rec) return;
+    state.userFinished = true;
+    clearTimeout(state.timer);
+    try { state.rec.stop(); } catch (e) { forceFinish(); return; }
+    clearTimeout(state.endTimer);
+    state.endTimer = setTimeout(function () {
+      if (state.listening) forceFinish();   // 兜底：个别浏览器不触发 onend
+    }, 1500);
+  }
+
+  function forceFinish() {
+    var text = (state.finalText + ' ' + (state.interim || '')).trim();
+    var rec = state.rec;
+    if (rec) { try { rec.onend = null; rec.abort(); } catch (e) {} }
+    stopUI();
+    if (!text) { toast('没听清，再大声一点试试～'); return; }
+    if (state.alts.indexOf(text) < 0) state.alts.push(text);
+    evaluate();
   }
 
   function evaluate() {
@@ -444,6 +485,7 @@
     var best = null;
     var cands = state.alts.slice();
     if (state.finalText.trim()) cands.push(state.finalText.trim());
+    if (state.interim && state.interim.trim()) cands.push(state.interim.trim());
     cands.forEach(function (t) {
       var r = scoreTexts(p.en, t);
       if (!best || r.score > best.score) { best = r; best.text = t; }
@@ -703,7 +745,10 @@
   function bind() {
     $('btnPlay').addEventListener('click', function () { speak(state.current.en); });
     $('btnSlow').addEventListener('click', function () { speak(state.current.en, 0.6); });
-    $('btnRecord').addEventListener('click', startRecord);
+    $('btnRecord').addEventListener('click', function () {
+      if (state.listening) finishRecord(); else startRecord();
+    });
+    $('btnDone').addEventListener('click', finishRecord);
     $('btnRecAudio').addEventListener('click', function () {
       if (recAudio.mr) stopRecAudio(); else startRecAudio();
     });
@@ -830,7 +875,7 @@
       if ($('settings').classList.contains('hidden') === false) return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
       if (e.code === 'Space') { e.preventDefault(); speak(state.current.en); }
-      else if (e.key === 'r' || e.key === 'R') { startRecord(); }
+      else if (e.key === 'r' || e.key === 'R') { if (state.listening) finishRecord(); else startRecord(); }
       else if (e.key === 'ArrowRight') { nextPhrase(); }
     });
   }
