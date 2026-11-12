@@ -142,6 +142,12 @@ body{
 }
 .btn.record.listening{background:linear-gradient(135deg,#2fc46b,#22a457);animation:pulse 1.2s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(47,196,107,.5)}70%{box-shadow:0 0 0 18px rgba(47,196,107,0)}}
+.btn.done{
+  width:100%;margin-top:10px;font-size:19px;padding:17px;color:#fff;
+  background:linear-gradient(135deg,#4f8cff,#2f6bff);box-shadow:0 10px 24px rgba(79,140,255,.4);
+  animation:fadeIn .18s;
+}
+.btn.done:active{transform:scale(.97)}
 .btn.danger{background:#ffecec;color:#d94a4a}
 
 .live{
