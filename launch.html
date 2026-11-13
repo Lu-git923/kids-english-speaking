@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#eef8ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>英语口语小达人</title>
+<style>
+  html,body{height:100%;margin:0;background:#eef8ff;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;color:#16303f}
+  .w{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+  .e{font-size:52px}
+  .t{font-size:16px;font-weight:700}
+  .s{font-size:12.5px;color:#7a90a0}
+  .a{font-size:13px;color:#4aa3e0;text-decoration:none;padding:10px 18px;background:#fff;border-radius:12px;box-shadow:0 3px 10px rgba(30,90,140,.12);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="e">🦜</div>
+  <div class="t">英语口语小达人</div>
+  <div class="s" id="st">正在打开最新版本…</div>
+  <a class="a" id="mk" href="v11.html">手动进入</a>
+</div>
+<script>
+(function () {
+  var FALLBACK = 'v11.html';           // 兜底入口（release.json 取不到时用）
+  var el = document.getElementById('st');
+  var mk = document.getElementById('mk');
+  mk.href = FALLBACK;
+
+  function go(entry) { location.replace(entry); }
+
+  if (!window.fetch) { setTimeout(function () { go(FALLBACK); }, 300); return; }
+
+  fetch('release.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      var entry = (j && j.entry) || FALLBACK;
+      mk.href = entry;
+      el.textContent = '版本 ' + ((j && j.version) || '') + ' · 正在打开…';
+      go(entry);
+    })
+    .catch(function () {
+      setTimeout(function () { go(FALLBACK); }, 400);
+    });
+})();
+</script>
+</body>
+</html>
