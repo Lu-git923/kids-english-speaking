@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#eef8ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="口语小达人">
+<meta name="format-detection" content="telephone=no">
+<title>英语口语小达人</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A6%9C%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="assets/20261112d/style.css">
+<link rel="stylesheet" href="assets/20261113b/home.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ========== 首页 ========== -->
+  <section id="home" class="screen active">
+    <header class="hero">
+      <div class="hero-emoji">🦜</div>
+      <h1>英语口语小达人</h1>
+      <p class="sub">听一听 · 跟着读 · 拿星星</p>
+    </header>
+
+    <div class="stats" id="statsRow">
+      <div class="stat"><b id="stDone">0</b><span>已练句子</span></div>
+      <div class="stat"><b id="stAvg">0</b><span>平均分</span></div>
+      <div class="stat"><b id="stStars">0</b><span>满星句子</span></div>
+    </div>
+
+        <button class="story-banner" onclick="location.href='story.html'">
+      <span class="sb-ico">📖</span>
+      <span class="sb-txt"><b>绘本跟读</b><i>原创分级故事 · 英式朗读 · 跟读打分</i></span>
+      <span class="sb-go">›</span>
+    </button>
+
+<div class="quick">
+      <button class="qbtn" data-mode="random"><span>🎲</span>随机挑战</button>
+      <button class="qbtn" data-mode="wrong"><span>📕</span>错题本</button>
+      <button class="qbtn" data-mode="fav"><span>⭐</span>我的收藏</button>
+      <button class="qbtn" id="btnSettings"><span>⚙️</span>设置</button>
+    </div>
+
+    <div class="sec-head" id="catHead">
+      <h2>按场景练</h2>
+      <span class="hint">直接挑内容</span>
+    </div>
+    <div id="catGrid" class="cat-grid"></div>
+
+    <div class="sec-head">
+      <h2>选择关卡</h2>
+      <span class="hint">每关 20 句</span>
+    </div>
+    <div id="unitGrid" class="unit-grid"></div>
+    <p class="footer-tip">建议用 Edge 或 Chrome 浏览器，允许使用麦克风 🎤 · v1112d</p>
+  </section>
+
+  <!-- ========== 练习页 ========== -->
+  <section id="practice" class="screen">
+    <div class="topbar">
+      <button id="btnBack" class="icon-btn" title="返回">←</button>
+      <div class="progress-wrap">
+        <div class="progress"><i id="progressBar"></i></div>
+        <div class="progress-text" id="progressText">1 / 20</div>
+      </div>
+      <button id="btnFav" class="icon-btn" title="收藏">☆</button>
+    </div>
+
+    <div class="card" id="card">
+      <div class="card-top">
+        <span class="badge" id="badgeInfo">第 1 关</span>
+        <span class="badge ghost" id="bestBadge">最好 — 分</span>
+        <span class="badge ghost" id="verBadge">v1112d</span>
+      </div>
+
+      <div class="en" id="enText">Hello!</div>
+      <div class="zh" id="zhText">你好！</div>
+      <button class="link-btn" id="toggleZh">隐藏中文</button>
+
+      <div class="controls">
+        <button id="btnPlay" class="btn primary big">🔊 听一听</button>
+        <button id="btnSlow" class="btn">🐢 慢速</button>
+      </div>
+
+      <button id="btnRecord" class="btn record">🎤 开始跟读</button>
+      <button id="btnDone" class="btn done idle">✅ 读完了，开始评分</button>
+
+      <div id="liveBox" class="live hidden">
+        <span class="dot"></span><span id="liveText">我在听……</span>
+      </div>
+
+      <!-- 录音对比（不依赖语音识别，安卓也能用） -->
+      <div id="audioTools" class="audio-tools hidden">
+        <button id="btnRecAudio" class="btn ghost small">🔴 录音对比</button>
+        <div id="playback" class="playback hidden">
+          <button id="btnPlayMine" class="btn small">▶️ 听我读的</button>
+          <button id="btnPlayStd" class="btn small">🔊 听标准音</button>
+          <button id="btnReRec" class="link-btn">🔁 重录</button>
+        </div>
+      </div>
+
+      <div id="result" class="result hidden">
+        <div class="score-row">
+          <div class="score-ring" id="scoreRing"><span id="scoreNum">0</span><small>分</small></div>
+          <div class="score-right">
+            <div class="stars" id="stars"></div>
+            <div class="praise" id="praise"></div>
+            <div class="sub-score" id="subScore"></div>
+          </div>
+        </div>
+        <div class="diff" id="diff"></div>
+        <div class="result-actions">
+          <button id="btnAgain" class="btn">🔁 再读一次</button>
+          <button id="btnNext" class="btn primary">下一句 ➡️</button>
+        </div>
+      </div>
+
+      <div id="manual" class="result hidden">
+        <p class="praise">家长听一下，读得怎么样？</p>
+        <div class="result-actions">
+          <button id="btnManualOk" class="btn primary">✅ 读对了</button>
+          <button id="btnManualNo" class="btn">🔁 再练练</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="kb-tip">空格键 = 听一遍 · R = 开始跟读 · → = 下一句</p>
+  </section>
+</div>
+
+<!-- ========== 本轮总结 ========== -->
+<div id="summary" class="overlay hidden">
+  <div class="sheet">
+    <div class="sheet-emoji" id="sumEmoji">🎉</div>
+    <h2 id="sumTitle">这一轮完成啦！</h2>
+    <div class="sum-grid">
+      <div class="stat"><b id="sumAvg">0</b><span>平均分</span></div>
+      <div class="stat"><b id="sumCount">0</b><span>练了句子</span></div>
+      <div class="stat"><b id="sumStars">0</b><span>拿到星星</span></div>
+    </div>
+    <div class="sum-list" id="sumList"></div>
+    <div class="result-actions">
+      <button id="btnSumAgain" class="btn">🔁 再来一遍</button>
+      <button id="btnSumHome" class="btn primary">🏠 回首页</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 设置 ========== -->
+<div id="settings" class="overlay hidden">
+  <div class="sheet">
+    <h2>⚙️ 设置</h2>
+    <label class="field">
+      <span>朗读声音</span>
+      <select id="selVoice"></select>
+    </label>
+    <label class="field">
+      <span>朗读速度 <b id="rateVal">0.9</b></span>
+      <input type="range" id="rateRange" min="0.5" max="1.3" step="0.05" value="0.9">
+    </label>
+    <label class="field row">
+      <span>自动朗读（进入新句子时）</span>
+      <input type="checkbox" id="chkAuto" checked>
+    </label>
+    <label class="field row">
+      <span>显示中文意思</span>
+      <input type="checkbox" id="chkZh" checked>
+    </label>
+    <label class="field">
+      <span>每轮句数</span>
+      <select id="selLen">
+        <option value="10">10 句</option>
+        <option value="20" selected>20 句</option>
+        <option value="30">30 句</option>
+      </select>
+    </label>
+    <p class="tiny" id="srState"></p>
+    <p class="tiny" id="voiceState"></p>
+    <p class="tiny" id="verLine">版本 v1112d · 带「读完了」按钮</p>
+    <div class="result-actions">
+      <button id="btnReset" class="btn danger">清空学习记录</button>
+      <button id="btnCloseSet" class="btn primary">完成</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="confetti" class="confetti"></div>
+
+<!-- 微信内置浏览器提示 -->
+<div id="wxTip" class="wx hidden">
+  <div class="wx-card">
+    <div class="wx-arrow">↗</div>
+    <h3>请用浏览器打开</h3>
+    <p>微信里的浏览器不能用麦克风评分，<br>点右上角 <b>⋯</b> → <b>在浏览器打开</b></p>
+    <div class="wx-steps">
+      <span>1️⃣ 点右上角 ⋯</span>
+      <span>2️⃣ 选「在浏览器打开」</span>
+      <span>3️⃣ 点「允许」使用麦克风</span>
+    </div>
+    <button id="wxCopy" class="btn primary">📋 复制链接</button>
+    <button id="wxStill" class="link-btn">仍然继续（只能听，不能打分）</button>
+  </div>
+</div>
+
+<script src="assets/20261112d/phrases.js"></script>
+<script src="assets/20261112d/app.js"></script>
+<!-- entry v20261113b -->
+</body>
+</html>
