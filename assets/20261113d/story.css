@@ -1,0 +1,112 @@
+/* 绘本跟读 · 样式 */
+* { box-sizing: border-box; }
+:root {
+  --blue: #4aa3e0;
+  --blue-d: #2b7fc0;
+  --ink: #16303f;
+  --soft: #7a90a0;
+  --bg: #eef8ff;
+}
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+.st-wrap {
+  max-width: 520px;
+  margin: 0 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 14px calc(14px + env(safe-area-inset-bottom));
+}
+
+/* 顶栏 */
+.st-top { display: flex; align-items: center; gap: 10px; padding: 6px 0 10px; }
+.st-top h1 { font-size: 16px; margin: 0; flex: 1; font-weight: 700; }
+.st-top .lv { font-size: 11px; color: var(--soft); font-weight: 500; display: block; margin-top: 2px; }
+.st-iconbtn {
+  width: 36px; height: 36px; border-radius: 12px; border: 0;
+  background: #fff; color: var(--blue-d); font-size: 17px;
+  box-shadow: 0 2px 8px rgba(30, 90, 140, .10);
+}
+
+/* 画面 */
+.st-art {
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 26px rgba(30, 90, 140, .12);
+  line-height: 0;
+}
+.st-art svg { width: 100%; height: auto; display: block; }
+
+/* 句子 */
+.st-sentence {
+  margin: 14px 2px 2px;
+  font-size: 25px;
+  line-height: 1.45;
+  font-weight: 700;
+  letter-spacing: .2px;
+  text-align: center;
+  word-break: break-word;
+}
+.st-sentence .w { display: inline-block; padding: 0 2px; border-radius: 6px; transition: background .12s, color .12s; }
+.st-sentence .w.said { background: #ffe9a8; }
+.st-sentence .w.hit { color: #1f9d55; }
+.st-sentence .w.miss { color: #d1453b; text-decoration: underline wavy rgba(209, 69, 59, .5); }
+.st-zh { text-align: center; font-size: 13px; color: var(--soft); margin: 6px 0 0; min-height: 18px; }
+
+/* 按钮区 */
+.st-actions { display: flex; gap: 10px; margin-top: 16px; }
+.st-btn {
+  flex: 1;
+  padding: 14px 8px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 14px;
+  border: 0;
+  background: #fff;
+  color: var(--blue-d);
+  box-shadow: 0 3px 10px rgba(30, 90, 140, .12);
+}
+.st-btn.primary { background: linear-gradient(135deg, var(--blue), var(--blue-d)); color: #fff; }
+.st-btn.rec { background: linear-gradient(135deg, #ff8b6b, #ee5b3f); color: #fff; }
+.st-btn.rec.on { animation: pulse 1.1s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(238,91,63,.45);} 50% { box-shadow: 0 0 0 12px rgba(238,91,63,0);} }
+.st-btn:disabled { opacity: .5; }
+
+.st-fb { min-height: 26px; text-align: center; font-size: 15px; font-weight: 600; margin-top: 12px; }
+.st-fb .stars { font-size: 22px; letter-spacing: 3px; }
+.st-fb .tip { display: block; font-size: 12.5px; color: var(--soft); font-weight: 500; margin-top: 4px; }
+
+/* 翻页 */
+.st-pager { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 16px; gap: 12px; }
+.st-dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; flex: 1; }
+.st-dot { width: 7px; height: 7px; border-radius: 50%; background: #cfe3f0; }
+.st-dot.on { background: var(--blue); transform: scale(1.35); }
+.st-dot.done { background: #9ed4a8; }
+.st-nav {
+  border: 0; background: #fff; color: var(--blue-d); font-size: 14px; font-weight: 600;
+  padding: 10px 14px; border-radius: 12px; box-shadow: 0 2px 8px rgba(30,90,140,.10);
+}
+.st-nav:disabled { opacity: .35; }
+
+/* 书单 */
+.st-list { display: grid; gap: 12px; margin-top: 4px; }
+.st-card {
+  display: flex; gap: 12px; align-items: center; text-align: left;
+  background: #fff; border: 0; border-radius: 16px; padding: 12px;
+  box-shadow: 0 4px 16px rgba(30, 90, 140, .10);
+}
+.st-card .cover { width: 92px; height: 70px; border-radius: 10px; overflow: hidden; flex: 0 0 auto; background: #eaf6ff; }
+.st-card .cover svg { width: 100%; height: 100%; display: block; }
+.st-card .meta { flex: 1; min-width: 0; }
+.st-card .meta b { display: block; font-size: 15px; color: var(--ink); }
+.st-card .meta span { font-size: 12px; color: var(--soft); }
+.st-card .go { color: var(--blue); font-size: 20px; }
+
+.st-hintbar { font-size: 12px; color: var(--soft); text-align: center; margin: 10px 0 0; line-height: 1.6; }
